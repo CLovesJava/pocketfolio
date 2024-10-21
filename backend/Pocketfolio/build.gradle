@@ -73,8 +73,8 @@ dependencies {
 	implementation 'org.apache.tika:tika-core:2.6.0'
 
 	// querydsl 추가
-	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
-	implementation "com.querydsl:querydsl-apt:${queryDslVersion}" // Querydsl 관련 코드 생성 기능
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}" // querydsl 라이브러리
+	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}" //  Querydsl 관련 코드 생성 기능 제공
 
 }
 
@@ -90,7 +90,7 @@ querydsl {
 	querydslSourcesDir = querydslDir
 }
 sourceSets { // IDE의 소스 폴더에 자동으로 넣어줌
-	main.java.srcDir querydslDir
+	main.java.srcDir querydslDir // 빌드시 컴파일이 필요한 소스위치
 }
 compileQuerydsl{
 	options.annotationProcessorPath = configurations.querydsl // Q파일 생성
@@ -99,6 +99,6 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
-	querydsl.extendsFrom compileClasspath // 컴파일 될 때 같이 수행
+	querydsl.extendsFrom compileClasspath // 컴파일 될 때 같이 수행 (외부라이브러리 컴파일 경로 상속)
 }
 // querydsl 추가 끝
