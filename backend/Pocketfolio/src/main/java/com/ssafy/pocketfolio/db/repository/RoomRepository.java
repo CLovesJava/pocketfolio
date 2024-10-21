@@ -1,12 +1,13 @@
 package com.ssafy.pocketfolio.db.repository;
 
 import com.ssafy.pocketfolio.db.entity.Room;
+import com.ssafy.pocketfolio.db.repository.custom.RoomRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface RoomRepository extends JpaRepository<Room, Long> {
+public interface RoomRepository extends JpaRepository<Room, Long>, RoomRepositoryCustom {
 
     List<Room> findAllByUser_UserSeqOrderByUpdatedDesc(long userSeq);
     List<Room> findAllByRoomSeqIn(List<Long> roomSeqs);
