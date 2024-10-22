@@ -1,13 +1,12 @@
 package com.ssafy.pocketfolio.api.dto.response;
 
-import com.ssafy.pocketfolio.db.view.SearchPortfolioListAddedRoomView;
-import com.ssafy.pocketfolio.db.view.SearchPortfolioListView;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -15,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Log4j2
 @Tag(name = "SearchPortfolioListRes", description = "포트폴리오 검색 목록 Response")
 public class SearchPortfolioListRes {
     @Schema(description = "포트폴리오 번호")
@@ -40,32 +40,42 @@ public class SearchPortfolioListRes {
     @Schema(description = "태그 리스트")
     private List<String> tags;
 
-    public SearchPortfolioListRes(SearchPortfolioListView view) {
-        portSeq = view.getPortSeq();
-        name = view.getName();
-        userSeq = view.getUserSeq();
-        userName = view.getUserName();
-        userProfilePic = view.getUserProfilePic();
-        tags = new ArrayList<>();
-        String tagStr = view.getTags();
-        if (StringUtils.hasText(tagStr)) {
-            String[] tagArr = tagStr.split(",", 6);
-            int maxLength = tagArr.length > 5 ? 5 : tagArr.length;
-            for (int i = 0; i < maxLength; i++) {
-                tags.add(tagArr[i]);
-            }
+    private transient String tagsString;
+
+    public void tagsStringToList() {
+        if (StringUtils.hasText(tagsString)) {
+            String[] tagArr = tagsString.split(",", 6);
+            int maxLength = Math.min(tagArr.length, 5);
+            tags = Arrays.asList(tagArr).subList(0, maxLength);
         }
     }
 
-    public SearchPortfolioListRes(SearchPortfolioListView view, SearchPortfolioListAddedRoomView roomView) {
-        this(view);
-        if (roomView != null) {
-            roomSeq = roomView.getRoomSeq();
-            roomName = roomView.getName();
-            roomThumbnail = roomView.getThumbnail();
-            like = roomView.getLike();
-            hit = roomView.getHit();
-        }
-    }
+//    public SearchPortfolioListRes(SearchPortfolioListView view) {
+//        portSeq = view.getPortSeq();
+//        name = view.getName();
+//        userSeq = view.getUserSeq();
+//        userName = view.getUserName();
+//        userProfilePic = view.getUserProfilePic();
+//        tags = new ArrayList<>();
+//        String tagStr = view.getTags();
+//        if (StringUtils.hasText(tagStr)) {
+//            String[] tagArr = tagStr.split(",", 6);
+//            int maxLength = tagArr.length > 5 ? 5 : tagArr.length;
+//            for (int i = 0; i < maxLength; i++) {
+//                tags.add(tagArr[i]);
+//            }
+//        }
+//    }
+//
+//    public SearchPortfolioListRes(SearchPortfolioListView view, SearchPortfolioListAddedRoomView roomView) {
+//        this(view);
+//        if (roomView != null) {
+//            roomSeq = roomView.getRoomSeq();
+//            roomName = roomView.getName();
+//            roomThumbnail = roomView.getThumbnail();
+//            like = roomView.getLike();
+//            hit = roomView.getHit();
+//        }
+//    }
 
 }

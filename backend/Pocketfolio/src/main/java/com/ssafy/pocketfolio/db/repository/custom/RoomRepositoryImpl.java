@@ -37,7 +37,7 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
     public Page<SearchRoomListRes> searchRooms(Long myUserSeq, String keyword, List<Long> categories, Pageable pageable) {
         log.debug("RoomRepositoryImpl: searchRooms()");
 
-        QRoomLike roomLike2 = new QRoomLike("roomLike2"); // TODO: QEntity 생성 중복 코드 private으로 넘겨도 되는지 확인
+        QRoomLike roomLike2 = new QRoomLike("roomLike2");
 
         List<SearchRoomListRes> content = queryFactory
             .select(Projections.fields(SearchRoomListRes.class,
@@ -73,7 +73,7 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
                     JPAExpressions
                         .select(follow.count())
                         .from(follow)
-                        .where(follow.userFrom.userSeq.eq(user.userSeq)), "follower"
+                        .where(follow.userTo.userSeq.eq(user.userSeq)), "follower"
                 )
             ))
             .from(room)
@@ -109,7 +109,7 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
     }
 
     private OrderSpecifier<?> getOrderSpecifiers(Pageable pageable) {
-        NumberPath<Long> likeCount = Expressions.numberPath(Long.class, "likeCount");
+        NumberPath<Long> likeCount = Expressions.numberPath(Long.class, "likeCount"); // alias가 있을 때만 작동함
         NumberPath<Long> hit = Expressions.numberPath(Long.class, "hit");
         NumberPath<Long> follower = Expressions.numberPath(Long.class, "follower");
 
