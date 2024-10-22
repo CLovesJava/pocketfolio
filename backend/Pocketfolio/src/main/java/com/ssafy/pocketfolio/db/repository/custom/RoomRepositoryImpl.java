@@ -39,23 +39,6 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
 
         QRoomLike roomLike2 = new QRoomLike("roomLike2"); // TODO: QEntity 생성 중복 코드 private으로 넘겨도 되는지 확인
 
-//        NumberPath<Long> sortAlias = Expressions.numberPath(Long.class, "like");
-//        Sort orders = pageable.getSort();
-//        if (!orders.isEmpty()) {
-//            for (Sort.Order order : orders) {
-//                switch (order.getProperty()) {
-//                    case "hit":
-//                        sortAlias = Expressions.numberPath(Long.class, "hit");
-//                        break;
-//                    case "follower":
-//                        sortAlias = Expressions.numberPath(Long.class, "follower");
-//                        break;
-//                    default:
-//                        sortAlias = Expressions.numberPath(Long.class, "like");
-//                }
-//            }
-//        }
-
         List<SearchRoomListRes> content = queryFactory
             .select(Projections.fields(SearchRoomListRes.class,
                 room.roomSeq,
@@ -68,7 +51,7 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
                     JPAExpressions
                         .select(roomLike.count())
                         .from(roomLike)
-                        .where(roomLike.room.roomSeq.eq(room.roomSeq)), "like"
+                        .where(roomLike.room.roomSeq.eq(room.roomSeq)), "likeCount"
                 ),
                 ExpressionUtils.as(
                     JPAExpressions
@@ -100,7 +83,7 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
             .leftJoin(category).on(category.categorySeq.eq(roomCategory.category.categorySeq))
             .where(getBooleanBuilder(keyword, categories))
             .groupBy(room.roomSeq)
-//            .orderBy(sortAlias.desc())
+            .orderBy(getOrderSpecifiers(pageable))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
@@ -126,25 +109,23 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
     }
 
     private OrderSpecifier<?> getOrderSpecifiers(Pageable pageable) {
-        NumberPath<Long> like = Expressions.numberPath(Long.class, "like");
+        NumberPath<Long> likeCount = Expressions.numberPath(Long.class, "likeCount");
         NumberPath<Long> hit = Expressions.numberPath(Long.class, "hit");
         NumberPath<Long> follower = Expressions.numberPath(Long.class, "follower");
 
         Sort orders = pageable.getSort();
-        if (orders.isEmpty()) {
-            return like.desc();
-        }
-
-        for (Sort.Order order : orders) {
-            switch (order.getProperty()) {
-                case "hit":
-                    return hit.desc();
-                case "follower":
-                    return follower.desc();
-                default:
-                    return like.desc();
+        if (!orders.isEmpty()) {
+            for (Sort.Order order : orders) {
+                switch (order.getProperty()) {
+                    case "hit":
+                        return hit.desc();
+                    case "follower":
+                        return follower.desc();
+                    default:
+                        return likeCount.desc();
+                }
             }
         }
-        return like.desc();
+        return likeCount.desc();
     }
 }
