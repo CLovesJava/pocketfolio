@@ -48,7 +48,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                         .where(follow.userFrom.userSeq.eq(user.userSeq)), "followingTotal"
                 ),
                 Expressions.cases()
-                    .when(follow.userFrom.isNotNull()).then(true)
+                    .when(follow.isNotNull()).then(true)
                     .otherwise(false).as("hasFollowed")
             ))
             .from(user)
