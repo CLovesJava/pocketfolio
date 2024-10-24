@@ -6,8 +6,7 @@ import com.ssafy.pocketfolio.api.dto.response.SearchRoomListRes;
 import com.ssafy.pocketfolio.api.dto.response.SearchUserListRes;
 import com.ssafy.pocketfolio.db.repository.PortfolioRepository;
 import com.ssafy.pocketfolio.db.repository.RoomRepository;
-import com.ssafy.pocketfolio.db.repository.SearchRepository;
-import com.ssafy.pocketfolio.db.view.SearchUserListView;
+import com.ssafy.pocketfolio.db.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -25,9 +24,9 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class SearchServiceImpl implements SearchService {
-    private final SearchRepository searchRepository;
     private final RoomRepository roomRepository;
     private final PortfolioRepository portfolioRepository;
+    private final UserRepository userRepository;
 
     private static final int SORT_ROOM_NUM_MAX = 3; // 각 sort 번호 최대값
     private static final int SORT_ROOM_BY_LIKE = 1;
@@ -65,7 +64,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public SearchRes searchRoom(Long myUserSeq, String keyword, Integer sort, Long categorySeqBinary, Integer size, Integer page) {
+    public SearchRes<SearchRoomListRes> searchRoom(Long myUserSeq, String keyword, Integer sort, Long categorySeqBinary, Integer size, Integer page) {
         if (myUserSeq == null) {
             myUserSeq = 0L;
         }
@@ -79,7 +78,7 @@ public class SearchServiceImpl implements SearchService {
             int i = 1;
             while (categorySeqBinary > 0L) {
                 if (categorySeqBinary % 2 == 1) {
-                    categories.add(Long.valueOf(i));
+                    categories.add((long) i);
                 }
                 categorySeqBinary /= 2;
                 i++;
@@ -104,7 +103,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public SearchRes searchPortfolio(String keyword, Integer sort, Integer size, Integer page) {
+    public SearchRes<SearchPortfolioListRes> searchPortfolio(String keyword, Integer sort, Integer size, Integer page) {
         if (keyword == null || keyword.isEmpty()) {
             keyword = "";
         }
@@ -131,43 +130,28 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public SearchRes searchUser(Long myUserSeq, String keyword, Integer sort, Integer size, Integer page) {
-        SearchRes result;
-
+    public SearchRes<SearchUserListRes> searchUser(Long myUserSeq, String keyword, Integer sort, Integer size, Integer page) {
         if (myUserSeq == null) {
             myUserSeq = 0L;
         }
-
         if (keyword == null || keyword.isEmpty()) { // QueryDSL로 바꾸면 "like %%" 자체를 없애고 검색
             keyword = ""; // like %%
-        }
-
-        if (sort == null || sort < 1 || sort > SORT_USER_NUM_MAX) {
-            sort = SORT_USER_BY_FOLLOWER; // default
         }
 
         if (size == null || size < 1) {
             size = SEARCH_DEFAULT_SIZE;
         }
-
         if (page == null || page < 1) {
             page = 1;
         }
         page--;
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<SearchUserListView> viewPage;
-        switch (sort) {
-            default: // SORT_USER_BY_FOLLOWER
-                viewPage = searchRepository.searchUserOrderByFollower(myUserSeq, keyword, pageable);
-                break;
+        if (sort == null || sort < 1 || sort > SORT_USER_NUM_MAX) {
+            sort = SORT_USER_BY_FOLLOWER; // default
         }
 
-        List<SearchUserListRes> list = new ArrayList<>();
-        viewPage.getContent().forEach(e -> list.add(new SearchUserListRes(e)));
+        Pageable pageable = PageRequest.of(page, size);
 
-        result = new SearchRes(list, viewPage.getTotalPages(), viewPage.getTotalElements());
-
-        return result;
+        Page<SearchUserListRes> viewPage = userRepository.searchUsers(myUserSeq, keyword, pageable);
+        return new SearchRes<>(viewPage.getContent(), viewPage.getTotalPages(), viewPage.getTotalElements());
     }
 }

@@ -1,6 +1,5 @@
 package com.ssafy.pocketfolio.api.dto.response;
 
-import com.ssafy.pocketfolio.db.view.SearchUserListView;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
@@ -27,13 +26,13 @@ public class SearchUserListRes {
     @Schema(description = "팔로우 여부")
     private boolean hasFollowed;
 
-    public SearchUserListRes(SearchUserListView view) {
-        this.userSeq = view.getUserSeq();
-        this.name = view.getName();
-        this.profilePic = view.getProfilePic();
-        this.describe = view.getDescribe();
-        this.followerTotal = view.getFollowerTotal();
-        this.followingTotal = view.getFollowingTotal();
-        this.hasFollowed = view.getHasFollowed() > 0;
-    }
+//    public SearchUserListRes(SearchUserListView view) {
+//        this.userSeq = view.getUserSeq();
+//        this.name = view.getName();
+//        this.profilePic = view.getProfilePic();
+//        this.describe = view.getDescribe();
+//        this.followerTotal = view.getFollowerTotal();
+//        this.followingTotal = view.getFollowingTotal();
+//        this.hasFollowed = view.getHasFollowed() > 0;
+//    }
 }
