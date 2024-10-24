@@ -1,6 +1,7 @@
 package com.ssafy.pocketfolio.db.repository;
 
 import com.ssafy.pocketfolio.db.entity.User;
+import com.ssafy.pocketfolio.db.repository.custom.UserRepositoryCustom;
 import com.ssafy.pocketfolio.db.view.UserView;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom {
 
 	Optional<User> findByEmail(String email);
 

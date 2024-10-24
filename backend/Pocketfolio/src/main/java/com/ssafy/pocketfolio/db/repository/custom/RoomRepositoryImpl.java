@@ -66,7 +66,7 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
 //                        .where(roomHit.room.roomSeq.eq(room.roomSeq))
 //                ).as("hit"),
                 Expressions.cases()
-                    .when(roomLike2.user.userSeq.isNotNull()).then(true)
+                    .when(roomLike2.isNotNull()).then(true)
                     .otherwise(false).as("isLiked"),
                 Expressions.stringTemplate("group_concat({0})", category.name).as("categoryName"),
                 ExpressionUtils.as(
@@ -91,8 +91,10 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
             .select(room.count())
             .from(room)
-            .where((room.name.contains(keyword).or(user.name.contains(keyword)))
-                .and(category.categorySeq.in(categories)));
+            .join(user).on(user.userSeq.eq(room.user.userSeq))
+            .leftJoin(roomCategory).on(roomCategory.room.roomSeq.eq(room.roomSeq))
+            .leftJoin(category).on(category.categorySeq.eq(roomCategory.category.categorySeq))
+            .where(getBooleanBuilder(keyword, categories));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
